@@ -52,11 +52,15 @@ Route::middleware('auth:sanctum')->prefix('usuarios')->group(function () {
     // Ruta para crear un nuevo usuario
     Route::post('/', [UserController::class, 'store'])->middleware('can:create,App\Models\User');
     // Ruta para ver la información de un usuario específico
-    Route::get('/{user}', [UserController::class, 'show'])->middleware('can:view,user');
+    Route::get('/{user}', [UserController::class, 'show']);
     // Ruta para actualizar los datos de un usuario específico
-    Route::put('/{user}', [UserController::class, 'update'])->middleware('can:update,user');
+    Route::put('/{user}', [UserController::class, 'update']);
     // Ruta para eliminar un usuario específico
-    Route::delete('/{user}', [UserController::class, 'destroy'])->middleware('can:delete,user');
+    Route::delete('/{user}', [UserController::class, 'destroy']);
+    // Ruta para cambiar el estado un usuario específico
+    Route::put('{id}/cambio-estado', [UserController::class, 'changeStatus']);
+    // Ruta para cambiar la contraseña un usuario específico
+    Route::put('{id}/cambio-contrseña', [UserController::class, 'changePassword']);
 });
 
 /// Rutas de perfil (ProfileController)
