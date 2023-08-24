@@ -27,30 +27,31 @@ use App\Http\Controllers\Api\V1\RolePermissionController;
 |--------------------------------------------------------------------------
 */
 
-// Ruta para iniciar sesión y obtener un token
-Route::post('login', [AuthController::class, 'login'])
-    ->name('login')
-    ->middleware('throttle:6,1'); // Límite de 6 intentos por minuto
-
-
-// Ruta para cerrar sesión y revocar tokens
-Route::middleware('auth:sanctum')->group(function () {
+// Rutas de autenticación (AuthController)
+Route::prefix('auth')->namespace('Api\V1')->group(function () {
+    // Ruta para iniciar sesión y generar token
+    Route::post('login', [AuthController::class, 'login'])
+         ->name('auth.login')
+         ->middleware('throttle:6,1'); // Límite de 6 intentos por minuto
+         
+    // Ruta para cerrar sesión y revocar tokens
     Route::post('logout', [AuthController::class, 'logout'])
-        ->name('logout');
+        ->name('auth.logout')
+        ->middleware('auth:sanctum');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Otras Rutas de la API
+|  Rutas del Usuario
 |--------------------------------------------------------------------------
 */
 
 /// Rutas de usuarios (UserController)
-Route::middleware('auth:sanctum')->prefix('usuarios')->group(function () {
+Route::middleware('auth:sanctum', 'role:Administrador')->prefix('usuarios')->group(function () {
     // Ruta para listar usuarios
-    Route::get('/', [UserController::class, 'index'])->middleware('can:viewAny,App\Models\User');
+    Route::get('/', [UserController::class, 'index']);
     // Ruta para crear un nuevo usuario
-    Route::post('/', [UserController::class, 'store'])->middleware('can:create,App\Models\User');
+    Route::post('/', [UserController::class, 'store']);
     // Ruta para ver la información de un usuario específico
     Route::get('/{user}', [UserController::class, 'show']);
     // Ruta para actualizar los datos de un usuario específico
@@ -63,6 +64,12 @@ Route::middleware('auth:sanctum')->prefix('usuarios')->group(function () {
     Route::put('{id}/cambio-contrseña', [UserController::class, 'changePassword']);
 });
 
+/*
+|--------------------------------------------------------------------------
+|  Rutas publicas de los autenticados
+|--------------------------------------------------------------------------
+*/
+
 /// Rutas de perfil (ProfileController)
 Route::middleware('auth:sanctum')->prefix('perfil')->group(function () {
     // Ruta para obtener información del usuario autenticado
@@ -72,6 +79,12 @@ Route::middleware('auth:sanctum')->prefix('perfil')->group(function () {
     // Ruta para cambiar la contraseña del usuario
     Route::patch('/actualizar-contrasena', [ProfileController::class, 'updatePassword']);
 });
+
+/*
+|--------------------------------------------------------------------------
+|  Rutas de los roles
+|--------------------------------------------------------------------------
+*/
 
 // Rutas de roles  (RoleController)
 Route::middleware('auth:sanctum', 'role:Administrador')->prefix('roles')->group(function () {
@@ -89,8 +102,14 @@ Route::middleware('auth:sanctum', 'role:Administrador')->prefix('roles')->group(
     Route::post('/{userId}', [RoleController::class, 'assignRoleToUser']);
 });
 
+/*
+|--------------------------------------------------------------------------
+|  Rutas de los permisos
+|--------------------------------------------------------------------------
+*/
+
 // Rutas de permisos (PermisoController)
-Route::middleware('auth:sanctum')->prefix('permisos')->group(function () {
+Route::middleware('auth:sanctum', 'role:Administrador')->prefix('permisos')->group(function () {
     // Ruta para obtener información de los permisos
     Route::get('/', [PermisoController::class, 'index']);
     // Ruta para crear un nuevo permiso
@@ -105,6 +124,11 @@ Route::middleware('auth:sanctum')->prefix('permisos')->group(function () {
     Route::post('/{roleId}', [PermisoController::class, 'assignPermissionToRole']);
 });
 
+/*
+|--------------------------------------------------------------------------
+| Otras Rutas de la API
+|--------------------------------------------------------------------------
+*/
 
 
 /*// Ejemplo de ruta protegida

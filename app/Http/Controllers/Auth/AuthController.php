@@ -25,13 +25,13 @@ class AuthController extends Controller
             $request->validate([
                 'email' => 'required|email', // El email es obligatorio y debe tener un formato válido
                 'password' => 'required',    // La contraseña es obligatoria
-                'device_name' => 'required', // El nombre del dispositivo es obligatorio
+                // 'device_name' => 'required', // El nombre del dispositivo es obligatorio
             ], [
                 // Mensajes personalizados para las validaciones
                 'email.required' => 'El campo email es obligatorio.',
                 'email.email' => 'Por favor, ingresa un email válido.',
                 'password.required' => 'El campo contraseña es obligatorio.',
-                'device_name.required' => 'El nombre del dispositivo es obligatorio.',
+                //  'device_name.required' => 'El nombre del dispositivo es obligatorio.',
             ]);
 
             // Verificar si el correo está registrado
@@ -58,12 +58,15 @@ class AuthController extends Controller
                 ]);
             }
 
+            // Generar el device_name basado en el agente del usuario
+            $deviceName = $request->userAgent();
+
 
             // Generar y retornar el token de acceso
             return response()->json([
                 'success' => true,
                 'message' => 'Inicio de sesión exitoso',
-                'token' => $user->createToken($request->device_name)->plainTextToken,
+                'token' => $user->createToken($deviceName)->plainTextToken,
                 'usuario' => $user,
             ], 200);
         } catch (ThrottleRequestsException $e) {
